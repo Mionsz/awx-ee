@@ -15,20 +15,22 @@ dependencies:
   galaxy: |
     ---
     collections:
+      - name: ansible.posix
+      - name: ansible.windows
       - name: awx.awx
       - name: azure.azcollection
         version: ">=2.1.0"
       - name: amazon.aws
-      - name: theforeman.foreman
-      - name: google.cloud
-      - name: openstack.cloud
+      - name: community.general
+      - name: community.docker
       - name: community.vmware
-      - name: ovirt.ovirt
+      - name: google.cloud
       - name: kubernetes.core
-      - name: ansible.posix
-      - name: ansible.windows
-      - name: redhatinsights.insights
       - name: kubevirt.core
+      - name: ovirt.ovirt
+      - name: openstack.cloud
+      - name: redhatinsights.insights
+      - name: theforeman.foreman
   system: |
     git-core [platform:rpm]
     python3.11-devel [platform:rpm compile]
@@ -50,6 +52,10 @@ dependencies:
     openssl-devel [platform:rpm compile]
   python: |
     git+https://github.com/ansible/ansible-sign
+    docker
+    kubernetes
+    jinja2
+    jmespath
     ncclient
     paramiko
     pykerberos
@@ -63,6 +69,14 @@ dependencies:
     six
     receptorctl
 additional_build_steps:
+  prepend_base:
+    - RUN yum install -y python3.11 unzip tar wget sudo && \
+    - mkdir -p "/opt/intel/intel_certs" && \
+    - curl --noproxy ".intel.com" -O -L "http://certificates.intel.com/repository/certificates/Intel%20Root%20Certificate%20Chain%20Base64.zip" --output-dir "/opt/intel/intel_certs" && \
+    - curl --noproxy ".intel.com" -O -L "http://certificates.intel.com/repository/certificates/PublicSHA2RootChain-Base64-crosssigned.zip" --output-dir "/opt/intel/intel_certs" && \
+    - curl --noproxy ".intel.com" -O -L "http://certificates.intel.com/repository/certificates/IntelSHA2RootChain-Base64.zip" --output-dir "/opt/intel/intel_certs" && \
+    - unzip "/opt/intel/intel_certs/"\*.zip -d /usr/local/share/ca-certificates && \
+    - update-ca-trust
   append_base:
     - RUN $PYCMD -m pip install -U pip
   append_final:
